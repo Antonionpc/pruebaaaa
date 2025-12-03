@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Tu Tienda</title>
+</head>
+<body>
+    <header>
+        <div class="banner">
+            <img src="imagenes/tienda-online.png" alt="Logo de la Tienda">
+            <input type="text" placeholder="Buscar productos..." id="searchInput">
+            <nav class="navigation">
+                <div class="nav-links">
+                    <a href="#" class="category-btn" data-category="all">Todos</a>
+                    <a href="#" class="category-btn" data-category="Electronica">Electrónica</a>
+                    <a href="#" class="category-btn" data-category="Hogar">Hogar</a>
+                    <a href="#" class="category-btn" data-category="Moda">Moda</a>
+                    <a href="#" class="category-btn" data-category="Juguetes">Juguetes</a>
+                    <a href="admin.html" class="nav-link-admin">Administrador</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="productos" id="productList">
+        <!-- Los productos se cargarán aquí desde localStorage -->
+    </section>
+    <footer>
+        <!-- Agrega el contenido del pie de página aquí -->
+    </footer>
+  
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            const productListContainer = document.getElementById('productList');
+            const storedProducts = localStorage.getItem('products');
+            let allProducts = [];
+
+            if (storedProducts) {
+                allProducts = JSON.parse(storedProducts);
+            }
+
+            // Función para renderizar (mostrar) los productos en la página
+            function renderProducts(productsToRender) {
+                productListContainer.innerHTML = ''; // Limpiar la lista actual
+
+                if (productsToRender.length === 0) {
+                    if (document.getElementById('searchInput').value) {
+                        productListContainer.innerHTML = '<p>No se encontraron productos que coincidan con tu búsqueda.</p>';
+                    } else {
+                        productListContainer.innerHTML = '<p>No hay productos en esta categoría.</p>';
+                    }
+                    return;
+                }
+
+                productsToRender.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'producto';
+
+                    productDiv.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" width="120" height="120">
+                        <p>${product.name}</p>
+                        <p>Precio: $${product.price.toFixed(2)}</p>
+                    `;
+                    productListContainer.appendChild(productDiv);
+                });
+            }
+
+            // Evento que se dispara cada vez que el usuario escribe en la barra de búsqueda
+            searchInput.addEventListener('input', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredProducts = allProducts.filter(product => {
+                    return product.name.toLowerCase().includes(searchTerm);
+                });
+                renderProducts(filteredProducts);
+            });
+
+            // Evento para los botones de categoría
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); // Evita que el enlace recargue la página
+                    const category = this.getAttribute('data-category');
+                    
+                    if (category === 'all') {
+                        renderProducts(allProducts);
+                    } else {
+                        const filteredProducts = allProducts.filter(product => product.category === category);
+                        renderProducts(filteredProducts);
+                    }
+                });
+            });
+
+            // Carga inicial de todos los productos
+            renderProducts(allProducts);
+        });
+    </script>
+</html>
